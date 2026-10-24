@@ -1,0 +1,77 @@
+<Window x:Class="WindowsMender.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WindowsMender - OS Diagnostics &amp; Repair Suite" Height="550" Width="800"
+        Background="#FF1E1E1E" Foreground="White" WindowStartupLocation="CenterScreen">
+
+	<Window.Resources>
+		<!-- Global ToolTip style to automatically wrap all inline ToolTip strings -->
+		<Style TargetType="ToolTip">
+			<Setter Property="MaxWidth" Value="350"/>
+			<Setter Property="ContentTemplate">
+				<Setter.Value>
+					<DataTemplate>
+						<TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+					</DataTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+	</Window.Resources>
+
+	<Grid Margin="15">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+
+		<!-- Header -->
+		<StackPanel Grid.Row="0" Margin="0,0,0,10">
+			<TextBlock Text="WindowsMender v1.0.0" FontSize="20" FontWeight="Bold" Foreground="#FF00ACC1"/>
+			<TextBlock Text="OS Diagnostics, WinSxS Component Repair &amp; Update Troubleshooter" FontSize="12" Foreground="#FFAAAAAA"/>
+		</StackPanel>
+
+		<!-- Main Content Area -->
+		<Grid Grid.Row="1">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="260"/>
+				<ColumnDefinition Width="*"/>
+			</Grid.ColumnDefinitions>
+
+			<!-- Action Buttons Panel with Tooltips -->
+			<StackPanel Grid.Column="0" Margin="0,0,15,0">
+				<Button x:Name="BtnElevate" Content="Restart as Administrator" Click="BtnElevate_Click" Margin="0,0,0,12" Padding="10" Background="#FFC2185B" Foreground="White" FontWeight="Bold" Visibility="Collapsed"
+                        ToolTip="Relaunches WindowsMender with full administrator permissions."/>
+
+				<Button x:Name="BtnCheckServices" Content="1. Check Services &amp; Server" Click="BtnCheckServices_Click" Margin="0,0,0,8" Padding="10" Background="#FF333333" Foreground="White"
+                        ToolTip="Verifies core update services (wuauserv, bits, cryptsvc, msiserver) and checks server update manifests via COM API."/>
+
+				<Button x:Name="BtnShowFailures" Content="2. Show Update Failures" Click="BtnShowFailures_Click" Margin="0,0,0,8" Padding="10" Background="#FF333333" Foreground="White"
+                        ToolTip="Scans the Windows System Event Log for recent update failure entries."/>
+
+				<Button x:Name="BtnCheckReboot" Content="3. Check Pending Reboot" Click="BtnCheckReboot_Click" Margin="0,0,0,8" Padding="10" Background="#FF333333" Foreground="White"
+                        ToolTip="Checks registry flags for pending system reboots required by CBS or Windows Update."/>
+
+				<Button x:Name="BtnClearCaches" Content="4. Clear Update Caches" Click="BtnClearCaches_Click" Margin="0,0,0,8" Padding="10" Background="#FF333333" Foreground="White"
+                        ToolTip="Safely stops update services and renames corrupted SoftwareDistribution and Catroot2 folders."/>
+
+				<Button x:Name="BtnForceDetection" Content="5. Force Update Detection" Click="BtnForceDetection_Click" Margin="0,0,0,8" Padding="10" Background="#FF333333" Foreground="White"
+                        ToolTip="Triggers UsoClient.exe to immediately scan for updates with Microsoft servers."/>
+
+				<Button x:Name="BtnStoreRepair" Content="6. Run DISM RestoreHealth" Click="BtnStoreRepair_Click" Margin="0,0,0,15" Padding="10" Background="#FFD32F2F" Foreground="White" FontWeight="Bold"
+                        ToolTip="Performs a deep repair of the WinSxS component store image using DISM. (Note: This can take 5-15+ minutes depending on system corruption levels, CPU performance, and storage drive speed)."/>
+			</StackPanel>
+
+			<!-- Live Output Console Window -->
+			<TextBox x:Name="TxtOutput" Grid.Column="1" Background="#FF121212" Foreground="#FF00FF66" FontFamily="Consolas" FontSize="12"
+                     IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="10"/>
+		</Grid>
+
+		<!-- Status Footer -->
+		<StatusBar Grid.Row="2" Background="#FF2D2D2D" Foreground="White" Margin="0,10,0,0">
+			<StatusBarItem>
+				<TextBlock x:Name="TxtStatus" Text="Ready."/>
+			</StatusBarItem>
+		</StatusBar>
+	</Grid>
+</Window>
