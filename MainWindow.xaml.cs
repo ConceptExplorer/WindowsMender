@@ -156,19 +156,29 @@ namespace WindowsMender
             }
         }
 
-        private void BtnStoreRepair_Click(object sender, RoutedEventArgs e)
+        private async void BtnStoreRepair_Click(object sender, RoutedEventArgs e)
         {
             Log("\n--- Running DISM Component Store Repair ---");
             Log("[!] Note: This may take several minutes depending on system health, corruption level, and storage drive speed.");
-            Log("[1/3] Stopping update services...");
-            ToggleServices(false);
 
-            Log("[2/3] Executing DISM /Online /Cleanup-Image /RestoreHealth...");
-            ExecuteProcess("dism.exe", "/Online /Cleanup-Image /RestoreHealth");
+            try
+            {
+                Log("[1/3] Stopping update services...");
+                ToggleServices(false);
 
-            Log("[3/3] Restarting update services...");
-            ToggleServices(true);
-            Log("Repair sequence completed. Please reboot your PC.");
+                Log("[2/3] Executing DISM /Online /Cleanup-Image /RestoreHealth...");
+                await ExecuteProcessAsync("dism.exe", "/Online /Cleanup-Image /RestoreHealth");
+            }
+            catch (Exception ex)
+            {
+                Log($"[!] Process execution error: {ex.Message}");
+            }
+            finally
+            {
+                Log("[3/3] Restarting update services...");
+                ToggleServices(true);
+                Log("Repair sequence completed. Please reboot your PC.");
+            }
         }
 
         private void ToggleServices(bool start)
@@ -188,41 +198,45 @@ namespace WindowsMender
             }
         }
 
-        private void ExecuteProcess(string fileName, string args)
-        {
-            try
-            {
-                ProcessStartInfo psi = new ProcessStartInfo
-                {
-                    FileName = fileName,
-                    Arguments = args,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true
-                };
-
-                using (Process proc = Process.Start(psi))
-                {
-                    proc.OutputDataReceived += (s, ev) => { if (ev.Data != null) Dispatcher.Invoke(() => Log(ev.Data)); };
-                    proc.ErrorDataReceived += (s, ev) => { if (ev.Data != null) Dispatcher.Invoke(() => Log(ev.Data)); };
-                    proc.BeginOutputReadLine();
-                    proc.BeginErrorReadLine();
-                    proc.WaitForExit();
-                }
-            }
-            catch (Exception ex)
-            {
-                Log($"Process execution error: {ex.Message}");
-            }
-        }
-
         private bool IsAdministrator()
         {
             using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
             {
                 WindowsPrincipal principal = new WindowsPrincipal(identity);
                 return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+        }
+
+        private async Task ExecuteProcessAsync(string fileName, string args)
+        {
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = fileName,
+                Arguments = args,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
+
+            using (Process proc = new Process { StartInfo = psi })
+            {
+                proc.OutputDataReceived += (s, ev) =>
+                {
+                    if (ev.Data != null)
+                        Dispatcher.InvokeAsync(() => Log(ev.Data));
+                };
+                proc.ErrorDataReceived += (s, ev) =>
+                {
+                    if (ev.Data != null)
+                        Dispatcher.InvokeAsync(() => Log(ev.Data));
+                };
+
+                proc.Start();
+                proc.BeginOutputReadLine();
+                proc.BeginErrorReadLine();
+
+                await proc.WaitForExitAsync();
             }
         }
     }
