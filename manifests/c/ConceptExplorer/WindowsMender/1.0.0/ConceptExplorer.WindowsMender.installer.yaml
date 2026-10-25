@@ -9,7 +9,7 @@ Commands:
 Installers:
 - Architecture: x64
   InstallerUrl: https://github.com/ConceptExplorer/WindowsMender/releases/download/v1.0.0/WindowsMender.exe
-  InstallerSha256: ED76F3220F55E6C214CE1166BF86251D870C3DC5D284233D8891C5D7DCA0EDBF
+  InstallerSha256: 7E9FC8A55DE03FD90656384BB3F1C07BB0D52A902739036E1FA25C17E16568B6
 ManifestType: installer
 ManifestVersion: 1.12.0
 ReleaseDate: 2026-10-24
